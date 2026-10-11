@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Temple Escape 3D — Advanced Endless Runner</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Red Danger Vignette (Chaser Monster alert) -->
+  <div id="danger-vignette"></div>
+
+  <!-- UI Overlay -->
+  <div id="ui-overlay">
+    <!-- Top HUD -->
+    <div class="hud-top">
+      <div class="stat-badge coin-badge">
+        <span class="icon">🪙</span>
+        <span id="hud-coins">0</span>
+      </div>
+
+      <div class="stat-badge score-badge">
+        <span class="icon">🏆</span>
+        <span id="hud-score">0</span>
+        <span id="hud-multiplier" class="multiplier-tag">1x</span>
+      </div>
+
+      <div class="stat-badge">
+        <span class="icon">🏃</span>
+        <span id="hud-distance">0 m</span>
+      </div>
+
+      <div class="hud-buttons ui-interactive">
+        <button id="btn-audio" class="btn-icon" title="Toggle Sound">🔊</button>
+        <button id="btn-pause" class="btn-icon" title="Pause Game">⏸️</button>
+      </div>
+    </div>
+
+    <!-- Active Powerups Progress HUD -->
+    <div class="powerups-hud">
+      <div id="gauge-jetpack" class="powerup-gauge hidden">
+        <span class="powerup-icon">🚀</span>
+        <div class="gauge-bar-bg">
+          <div class="gauge-bar-fill fill-jetpack" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div id="gauge-magnet" class="powerup-gauge hidden">
+        <span class="powerup-icon">🧲</span>
+        <div class="gauge-bar-bg">
+          <div class="gauge-bar-fill fill-magnet" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div id="gauge-shield" class="powerup-gauge hidden">
+        <span class="powerup-icon">🛡️</span>
+        <div class="gauge-bar-bg">
+          <div class="gauge-bar-fill fill-shield" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div id="gauge-boost" class="powerup-gauge hidden">
+        <span class="powerup-icon">⚡</span>
+        <div class="gauge-bar-bg">
+          <div class="gauge-bar-fill fill-boost" style="width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Virtual Touch Controls -->
+    <div class="touch-controls ui-interactive">
+      <div class="touch-lane-group">
+        <button id="btn-left" class="touch-btn">◀</button>
+        <button id="btn-right" class="touch-btn">▶</button>
+      </div>
+      <div class="touch-action-group">
+        <button id="btn-slide" class="touch-btn">▼</button>
+        <button id="btn-jump" class="touch-btn">▲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Menu Modal -->
+  <div id="start-modal" class="modal-overlay">
+    <div class="modal-card ui-interactive">
+      <h1 class="game-title">TEMPLE ESCAPE</h1>
+      <p class="game-subtitle">3D ADVANCED ENDLESS RUNNER</p>
+      
+      <div class="high-score-banner">
+        BEST RUN: <span id="start-high-score">0</span> PTS
+      </div>
+
+      <div>
+        <button id="btn-play" class="btn-primary">START RUN</button>
+      </div>
+      <div>
+        <button id="btn-open-shop" class="btn-secondary">UPGRADES &amp; SKINS</button>
+        <button id="btn-open-help" class="btn-secondary">HOW TO PLAY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrades & Shop Modal -->
+  <div id="shop-modal" class="modal-overlay hidden">
+    <div class="modal-card ui-interactive">
+      <h2 class="game-title" style="font-size: 2rem;">ANCIENT BAZAAR</h2>
+      <div class="stat-badge coin-badge" style="display: inline-flex; margin-bottom: 16px;">
+        <span class="icon">🪙</span>
+        <span id="shop-coins-display">0</span>
+      </div>
+
+      <div class="shop-tabs">
+        <button id="tab-btn-upgrades" class="tab-btn active">POWER-UP UPGRADES</button>
+        <button id="tab-btn-skins" class="tab-btn">CHARACTER SKINS</button>
+      </div>
+
+      <div id="shop-upgrades-container" class="shop-list"></div>
+      <div id="shop-skins-container" class="shop-list" style="display: none;"></div>
+
+      <button id="btn-close-shop" class="btn-secondary">BACK</button>
+    </div>
+  </div>
+
+  <!-- How to Play Modal -->
+  <div id="help-modal" class="modal-overlay hidden">
+    <div class="modal-card ui-interactive">
+      <h2 class="game-title" style="font-size: 2rem;">CONTROLS &amp; TIPS</h2>
+      
+      <ul class="instructions-list">
+        <li><strong>Left / Right Arrow or A / D:</strong> Switch Lanes or Turn 90° at Intersections</li>
+        <li><strong>Up Arrow or W / Space:</strong> Jump over low logs, fire pits, and chasms</li>
+        <li><strong>Down Arrow or S:</strong> Slide under high stone arches &amp; blades</li>
+        <li><strong>Swipe Gestures:</strong> Mobile &amp; touch screen friendly swipe controls</li>
+        <li><strong>🚀 Jetpack:</strong> Soar high above obstacles and collect sky coin rings!</li>
+        <li><strong>🧲 Coin Magnet:</strong> Magically vacuum all nearby gold coins!</li>
+        <li><strong>🛡️ Totem Shield:</strong> Absorbs 1 lethal obstacle collision!</li>
+        <li><strong>⚡ Relic Rush:</strong> Invulnerable super-speed dash!</li>
+        <li><strong>👹 Chaser Beast:</strong> Don't stumble or the demon monkey pounces!</li>
+      </ul>
+
+      <button id="btn-close-help" class="btn-secondary">GOT IT!</button>
+    </div>
+  </div>
+
+  <!-- Pause Modal -->
+  <div id="pause-modal" class="modal-overlay hidden">
+    <div class="modal-card ui-interactive">
+      <h2 class="game-title" style="font-size: 2.2rem;">GAME PAUSED</h2>
+      <p class="game-subtitle">TAKE A BREATH, EXPLORER</p>
+
+      <button id="btn-resume" class="btn-primary">RESUME</button>
+      <div>
+        <button id="btn-restart-pause" class="btn-secondary">RESTART</button>
+        <button id="btn-menu-pause" class="btn-secondary">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="gameover-modal" class="modal-overlay hidden">
+    <div class="modal-card ui-interactive">
+      <h2 id="gameover-title" class="game-title" style="font-size: 2.2rem; color: #ff4444;">RUN OVER!</h2>
+      <p id="gameover-reason" class="game-subtitle">CAUGHT IN THE ANCIENT RUINS</p>
+
+      <div id="gameover-new-high" class="high-score-banner" style="display: none;">
+        🎉 NEW HIGH SCORE RECORD! 🎉
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">DISTANCE</div>
+          <div id="go-stat-distance" class="stat-val">0 m</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">COINS COLLECTED</div>
+          <div id="go-stat-coins" class="stat-val">🪙 0</div>
+        </div>
+        <div class="stat-item" style="grid-column: span 2;">
+          <div class="stat-label">FINAL SCORE</div>
+          <div id="go-stat-score" class="stat-val" style="font-size: 2rem;">0</div>
+        </div>
+      </div>
+
+      <button id="btn-restart" class="btn-primary">PLAY AGAIN</button>
+      <div>
+        <button id="btn-go-shop" class="btn-secondary">VISIT SHOP</button>
+        <button id="btn-go-menu" class="btn-secondary">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Script Entry -->
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
